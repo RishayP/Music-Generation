@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Generated Music Player</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            margin: 0;
+            padding: 0;
+            background-color: #f0f0f0;
+        }
+        h1 {
+            margin-top: 50px;
+        }
+        .music-container {
+            margin: 20px;
+        }
+        .music-controls {
+            margin-top: 20px;
+        }
+        .button {
+            background-color: #4CAF50;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            cursor: pointer;
+            font-size: 16px;
+            border-radius: 5px;
+        }
+        .button:hover {
+            background-color: #45a049;
+        }
+        .feedback-buttons {
+            margin-top: 20px;
+        }
+        .feedback-button {
+            background-color: #f44336;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            cursor: pointer;
+            font-size: 16px;
+            border-radius: 5px;
+            margin: 0 10px;
+        }
+        .feedback-button:hover {
+            background-color: #e53935;
+        }
+    </style>
+</head>
+<body>
+    <h1>Generated Music Tracks</h1>
+
+    <div id="trackContainer" class="music-container">
+        <h2 id="trackName">Select a track</h2>
+        <audio id="audioPlayer" controls>
+            <source id="audioSource" src="" type="audio/wav">
+            Your browser does not support the audio element.
+        </audio>
+    </div>
+
+    <div class="music-controls">
+        <button class="button" id="nextTrackButton">Next Track</button>
+    </div>
+
+    <div class="feedback-buttons">
+        <button class="feedback-button" id="likeButton">Like</button>
+        <button class="feedback-button" id="dislikeButton">Dislike</button>
+    </div>
+
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script>
+        let currentTrack = null;
+
+        // Function to update the track and play it
+        function updateTrack(track) {
+            currentTrack = track;
+            $('#trackName').text(track);
+            $('#audioSource').attr('src', '/play/' + track);
+            $('#audioPlayer')[0].load();  // Reload the audio element with new track
+            $('#audioPlayer')[0].play();  // Start playing the new track
+        }
+
+        // On clicking the "Next Track" button
+        $('#nextTrackButton').click(function() {
+            $.ajax({
+                url: '/next-track',
+                method: 'GET',
+                success: function(response) {
+                    updateTrack(response.track);  // Update and play the next track
+                }
+            });
+        });
+
+        // On clicking the "Like" button
+        $('#likeButton').click(function() {
+            if (currentTrack) {
+                $.ajax({
+                    url: '/feedback',
+                    method: 'POST',
+                    contentType: 'application/json',
+                    data: JSON.stringify({ liked: true, track: currentTrack }),
+                    success: function(response) {
+                        alert('Thank you for your feedback!');
+                    }
+                });
+            }
+        });
+
+        // On clicking the "Dislike" button
+        $('#dislikeButton').click(function() {
+            if (currentTrack) {
+                $.ajax({
+                    url: '/feedback',
+                    method: 'POST',
+                    contentType: 'application/json',
+                    data: JSON.stringify({ liked: false, track: currentTrack }),
+                    success: function(response) {
+                        alert('Thank you for your feedback!');
+                    }
+                });
+            }
+        });
+
+        // Initialize the page with the first track
+        $(document).ready(function() {
+            $.ajax({
+                url: '/next-track',
+                method: 'GET',
+                success: function(response) {
+                    updateTrack(response.track);
+                }
+            });
+        });
+    </script>
+</body>
+</html>
